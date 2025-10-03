@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,10 +86,23 @@ public class JwtService {
   }
 
   /**
-   * Obtém a chave de assinatura a partir do segredo (decodificado de Base64).
+   * Obtém a chave de assinatura a partir do segredo.
+   * Tenta decodificar como Base64, caso falhe, usa SHA-256 para garantir tamanho adequado.
    */
   private Key getSigningKey() {
-    byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-    return Keys.hmacShaKeyFor(keyBytes);
+    try {
+      // Primeiro tenta decodificar como Base64
+      byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+      return Keys.hmacShaKeyFor(keyBytes);
+    } catch (Exception e) {
+      // Se falhar, gera uma chave de 256 bits usando SHA-256
+      try {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] keyBytes = digest.digest(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(keyBytes);
+      } catch (NoSuchAlgorithmException ex) {
+        throw new RuntimeException("Failed to generate signing key from secret", ex);
+      }
+    }
   }
 }
