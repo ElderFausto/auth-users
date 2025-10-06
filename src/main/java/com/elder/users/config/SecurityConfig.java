@@ -1,7 +1,5 @@
 package com.elder.users.config;
 
-// Não precisa mexer nos imports
-
 import com.elder.users.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,18 +12,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService; // Import já deve existir
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+// IMPORTS ADICIONADOS PARA O CORS
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
+
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  // 1. INJEÇÃO DO NOVO SERVIÇO
   private final UserDetailsService userDetailsService;
   private final JwtAuthenticationFilter jwtAuthFilter;
 
@@ -33,6 +36,8 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
+        // <<< PARTE 1 ADICIONADA: APLICANDO A CONFIGURAÇÃO DE CORS
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/**").permitAll()
             .anyRequest().authenticated()
@@ -44,10 +49,26 @@ public class SecurityConfig {
     return http.build();
   }
 
+  // <<< PARTE 2 ADICIONADA: DEFININDO AS REGRAS DE CORS
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    // Define a origem permitida (nosso frontend Angular)
+    configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+    // Define os métodos HTTP permitidos
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    // Define os cabeçalhos HTTP permitidos
+    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    // Aplica esta configuração a todas as rotas da nossa API (/**)
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    // 3. USE O SERVIÇO INJETADO AQUI
     authProvider.setUserDetailsService(userDetailsService);
     authProvider.setPasswordEncoder(passwordEncoder());
     return authProvider;
@@ -62,13 +83,4 @@ public class SecurityConfig {
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
-
-  // 2. REMOVA ESTE MÉTODO COMPLETAMENTE
-    /*
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-    }
-    */
 }
