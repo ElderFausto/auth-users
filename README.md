@@ -3,15 +3,15 @@
 API RESTful para cadastro e login de usuários, construída com Spring Boot 3, Spring Security e autenticação via JSON Web Tokens (JWT).
 
 ## Tecnologias Utilizadas
-- Java 17
-- Spring Boot 3.x
+- Java 21
+- Spring Boot 3
 - Spring Web
 - Spring Data JPA
 - Spring Security
 - Lombok
 - PostgreSQL
 - Maven
-- JJWT (para manipulação de JWT)
+- JJWT
 
 ## Como Gerar o Projeto
 O projeto foi gerado usando o [Spring Initializr](https://start.spring.io/) com as seguintes dependências:
