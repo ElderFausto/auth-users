@@ -1,5 +1,10 @@
 # API de Autenticação de Usuários com Spring Boot
 
+[![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://www.java.com)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Maven](https://img.shields.io/badge/Maven-4.0-red.svg)](https://maven.apache.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 API RESTful para cadastro e login de usuários, construída com Spring Boot 3, Spring Security e autenticação via JSON Web Tokens (JWT).
 
 ## Tecnologias Utilizadas
